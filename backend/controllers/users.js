@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const ERROR_INVALID_DATA = 400;
 const ERROR_NOT_FOUND = 404;
@@ -98,5 +99,27 @@ module.exports.updateUserAvatar = (req, res) => {
         console.error('Erro interno do servidor:', error);
         res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
       }
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findOne({ email })
+    .then(user => {
+      if (!user) {
+        return res.status(401).json({ message: 'Credenciais inválidas' });
+      }
+      bcrypt.compare(password, user.password, (err, result) => {
+        if (err || !result) {
+          return res.status(401).json({ message: 'Credenciais inválidas' });
+        }
+        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.status(200).json({ token });
+      });
+    })
+    .catch(error => {
+      console.error('Erro ao fazer login:', error);
+      res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
     });
 };
