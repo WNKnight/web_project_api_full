@@ -123,3 +123,19 @@ module.exports.login = (req, res) => {
       res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
     });
 };
+
+module.exports.getUserProfile = (req, res) => {
+  const userId = req.user._id;
+
+  User.findById(userId)
+    .then(user => {
+      if (!user) {
+        return res.status(404).json({ message: 'Usuário não encontrado' });
+      }
+      res.status(200).json({ data: user });
+    })
+    .catch(error => {
+      console.error('Erro ao buscar usuário:', error);
+      res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro ao buscar informações do usuário' });
+    });
+};

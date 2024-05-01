@@ -4,6 +4,7 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middleware/auth');
 
 const app = express();
+const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
 app.use(express.json());
@@ -22,8 +23,10 @@ app.use((req, res, next) => {
 
 app.post('/signin', login);
 app.post('/signup', createUser);
+
 app.use(auth)
 
+app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 
 app.use((req, res, next) => {
