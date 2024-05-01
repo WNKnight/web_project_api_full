@@ -1,0 +1,28 @@
+.footer {
+  width: 100%;
+  color: aliceblue;
+  margin: 50px auto 36px;
+
+}
+.footer__copyright {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.21;
+  color: #545454;
+  text-align: left;
+  margin: 0;
+}
+@media screen and (max-width: 520px) {
+  .footer {
+    width: 100%;
+    color: aliceblue;
+    margin: 50px auto 36px;
+  }
+  .footer__copyright {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.21;
+    margin: 0 auto 0;
+    text-align: center;
+  }
+}

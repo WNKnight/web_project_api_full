@@ -1,0 +1,94 @@
+const User = require('../models/user');
+
+const ERROR_INVALID_DATA = 400;
+const ERROR_NOT_FOUND = 404;
+const ERROR_DEFAULT = 500;
+
+module.exports.getAllUsers = (req, res) => {
+  User.find({})
+    .then(users => res.status(200).json({ data: users }))
+    .catch(error => {
+      console.error('Erro interno do servidor:', error);
+      res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
+    });
+};
+
+module.exports.getUserById = (req, res) => {
+  const userId = req.params.userId;
+  User.findById(userId)
+    .orFail(() => {
+      const error = new Error('Usuário não encontrado');
+      error.statusCode = ERROR_NOT_FOUND;
+      throw error;
+    })
+    .then(user => res.status(200).json({ data: user }))
+    .catch(error => {
+      if (error.name === 'DocumentNotFoundError' || error.name === 'CastError') {
+        res.status(ERROR_NOT_FOUND).json({ message: 'Usuário não encontrado' });
+      } else {
+        console.error('Erro interno do servidor:', error);
+        res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
+      }
+    });
+};
+
+module.exports.createUser = (req, res) => {
+  const { name, about, avatar } = req.body;
+
+  User.create({ name, about, avatar })
+    .then(newUser => res.status(201).json({ data: newUser }))
+    .catch(error => {
+      if (error.name === 'ValidationError') {
+        res.status(ERROR_INVALID_DATA).json({ message: 'Dados inválidos passados para criar um usuário' });
+      } else {
+        console.error('Erro ao criar usuário:', error);
+        res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
+      }
+    });
+};
+
+module.exports.updateUserProfile = (req, res) => {
+  const userId = req.user._id;
+  const { name, about } = req.body;
+
+  User.findByIdAndUpdate(userId, { name, about }, { new: true })
+    .orFail(() => {
+      const error = new Error('Usuário não encontrado');
+      error.statusCode = ERROR_NOT_FOUND;
+      throw error;
+    })
+    .then(updatedUser => res.status(200).json({ data: updatedUser }))
+    .catch(error => {
+      if (error.name === 'DocumentNotFoundError' || error.name === 'CastError') {
+        res.status(ERROR_NOT_FOUND).json({ message: 'Usuário não encontrado' });
+      } else if (error.name === 'ValidationError') {
+        res.status(ERROR_INVALID_DATA).json({ message: 'Dados inválidos passados para atualizar o perfil' });
+      } else {
+        console.error('Erro interno do servidor:', error);
+        res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
+      }
+    });
+};
+
+module.exports.updateUserAvatar = (req, res) => {
+  const userId = req.user._id;
+  const { avatar } = req.body;
+
+  User.findByIdAndUpdate(userId, { avatar }, { new: true })
+    .orFail(() => {
+      const error = new Error('Usuário não encontrado');
+      error.statusCode = ERROR_NOT_FOUND;
+      throw error;
+    })
+    .then(updatedUser => res.status(200).json({ data: updatedUser }))
+    .catch(error => {
+      if (error.name === 'DocumentNotFoundError' || error.name === 'CastError') {
+        res.status(ERROR_NOT_FOUND).json({ message: 'Usuário não encontrado' });
+      } else if (error.name === 'ValidationError') {
+        res.status(ERROR_INVALID_DATA).json({ message: 'Dados inválidos passados para atualizar o avatar' });
+      } else {
+        console.error('Erro interno do servidor:', error);
+        res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
+      }
+    });
+};

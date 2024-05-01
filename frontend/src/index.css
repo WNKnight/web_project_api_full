@@ -1,0 +1,26 @@
+@import url(./vendor/normalize.css);
+@import url(./fonts/inter.css);
+@import url(./blocks/header.css);
+@import url(./blocks/page.css);
+@import url(./blocks/authForms.css);
+@import url(./blocks/infoToolTip.css);
+@import url(./blocks/profile.css);
+@import url(./blocks/popup.css);
+@import url(./blocks/gallery.css);
+@import url(./blocks/footer.css);
+
+body {
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
