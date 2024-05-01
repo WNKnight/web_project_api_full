@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const bcrypt = require('bcrypt');
 
 const ERROR_INVALID_DATA = 400;
 const ERROR_NOT_FOUND = 404;
@@ -33,18 +34,25 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar })
-    .then(newUser => res.status(201).json({ data: newUser }))
-    .catch(error => {
-      if (error.name === 'ValidationError') {
-        res.status(ERROR_INVALID_DATA).json({ message: 'Dados inválidos passados para criar um usuário' });
-      } else {
-        console.error('Erro ao criar usuário:', error);
-        res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
-      }
-    });
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error('Erro ao gerar hash da senha:', err);
+      return res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
+    }
+
+    User.create({ name, about, avatar, email, password: hashedPassword })
+      .then(newUser => res.status(201).json({ data: newUser }))
+      .catch(error => {
+        if (error.name === 'ValidationError') {
+          res.status(ERROR_INVALID_DATA).json({ message: 'Dados inválidos passados para criar um usuário' });
+        } else {
+          console.error('Erro ao criar usuário:', error);
+          res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
+        }
+      });
+  });
 };
 
 module.exports.updateUserProfile = (req, res) => {
