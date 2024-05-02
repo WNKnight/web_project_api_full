@@ -31,21 +31,27 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   const cardId = req.params.cardId;
+  const userIdFromRequest = req.user._id;
 
-  Card.findByIdAndDelete(cardId)
-    .orFail(() => {
-      const error = new Error('Cartão não encontrado');
-      error.statusCode = ERROR_NOT_FOUND;
-      throw error;
-    })
-    .then(() => res.status(200).json({ message: 'Cartão deletado com sucesso' }))
-    .catch(error => {
-      if (error.name === 'DocumentNotFoundError' || error.name === 'CastError') {
-        res.status(ERROR_NOT_FOUND).json({ message: 'Cartão não encontrado' });
-      } else {
-        console.error('Erro interno do servidor:', error);
-        res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro no servidor' });
+  Card.findById(cardId)
+    .then(card => {
+      if (!card) {
+        return res.status(404).json({ message: 'Cartão não encontrado' });
       }
+      if (card.owner !== userIdFromRequest) {
+        return res.status(403).json({ message: 'Acesso proibido: Você não pode excluir cartões de outros usuários' });
+      }
+
+      Card.findByIdAndDelete(cardId)
+        .then(() => res.status(200).json({ message: 'Cartão deletado com sucesso' }))
+        .catch(error => {
+          console.error('Erro ao excluir cartão:', error);
+          res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro ao excluir o cartão' });
+        });
+    })
+    .catch(error => {
+      console.error('Erro ao buscar cartão:', error);
+      res.status(ERROR_DEFAULT).json({ message: 'Ocorreu um erro ao buscar o cartão' });
     });
 };
 

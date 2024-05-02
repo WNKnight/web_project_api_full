@@ -57,10 +57,16 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.updateUserProfile = (req, res) => {
-  const userId = req.user._id;
+  const userIdFromRequest = req.user._id;
+  const userIdFromParams = req.params.userId;
+
+  if (userIdFromRequest !== userIdFromParams) {
+    return res.status(403).json({ message: 'Acesso proibido: Você não pode editar o perfil de outros usuários' });
+  }
+
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(userId, { name, about }, { new: true })
+  User.findByIdAndUpdate(userIdFromParams, { name, about }, { new: true })
     .orFail(() => {
       const error = new Error('Usuário não encontrado');
       error.statusCode = ERROR_NOT_FOUND;
@@ -80,10 +86,16 @@ module.exports.updateUserProfile = (req, res) => {
 };
 
 module.exports.updateUserAvatar = (req, res) => {
-  const userId = req.user._id;
+  const userIdFromRequest = req.user._id;
+  const userIdFromParams = req.params.userId;
+
+  if (userIdFromRequest !== userIdFromParams) {
+    return res.status(403).json({ message: 'Acesso proibido: Você não pode mudar o avatar de outros usuários' });
+  }
+
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(userId, { avatar }, { new: true })
+  User.findByIdAndUpdate(userIdFromParams, { avatar }, { new: true })
     .orFail(() => {
       const error = new Error('Usuário não encontrado');
       error.statusCode = ERROR_NOT_FOUND;
