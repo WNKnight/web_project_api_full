@@ -10,24 +10,23 @@ const cardsRouter = require('./routes/cards');
 app.use(express.json());
 
 mongoose.connect('mongodb://localhost:27017/aroundb')
-.then(() => console.log('Conexão com MongoDB estabelecida com sucesso'))
-.catch(err => console.error('Erro ao conectar ao MongoDB:', err));
-
-app.use((req, res, next) => {
-  req.user = {
-    _id: '6603244bb6bf0c6caa97decd'
-  };
-
-  next();
-});
+  .then(() => console.log('Conexão com MongoDB estabelecida com sucesso'))
+  .catch(err => console.error('Erro ao conectar ao MongoDB:', err));
 
 app.post('/signin', login);
 app.post('/signup', createUser);
 
-app.use(auth)
+app.use(auth);
 
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
+
+app.use((err, req, res, next) => {
+  if (err.name === 'UnauthorizedError') {
+    return res.status(403).json({ message: 'Acesso não autorizado' });
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Recurso solicitado não encontrado' });
