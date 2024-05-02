@@ -117,7 +117,7 @@ module.exports.updateUserAvatar = (req, res) => {
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
-  User.findOne({ email })
+  User.findOne({ email }).select('+password')
     .then(user => {
       if (!user) {
         return res.status(401).json({ message: 'Credenciais inválidas' });
@@ -126,7 +126,7 @@ module.exports.login = (req, res) => {
         if (err || !result) {
           return res.status(401).json({ message: 'Credenciais inválidas' });
         }
-        const token = jwt.sign({ _id: user._id }, 'chave-para-teste', { expiresIn: '7d' }); // NAO ESQUECER DE MUDAR A CHAVE AQUI PARA A MESMA DE AUTH.JS
+        const token = jwt.sign({ _id: user._id }, 'chave-para-teste', { expiresIn: '7d' }); // NÃO ESQUECER DE MUDAR A CHAVE AQUI PARA A MESMA DE AUTH.JS
         res.status(200).json({ token });
       });
     })
