@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middleware/auth');
+const errorHandle = require('./middleware/errorHandle')
 
 const app = express();
 const usersRouter = require('./routes/users');
@@ -21,16 +22,7 @@ app.use(auth);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 
-app.use((err, req, res, next) => {
-  if (err.name === 'UnauthorizedError') {
-    return res.status(403).json({ message: 'Acesso não autorizado' });
-  }
-  next();
-});
-
-app.use((req, res, next) => {
-  res.status(404).json({ message: 'Recurso solicitado não encontrado' });
-});
+app.use(errorHandle)
 
 const { PORT = 3000 } = process.env;
 
