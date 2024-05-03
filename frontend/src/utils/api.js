@@ -1,7 +1,10 @@
 class Api {
   constructor(config) {
     this.baseUrl = config.baseUrl;
-    this.headers = config.headers;
+    this.headers = {
+      ...config.headers,
+      'Authorization': `Bearer ${localStorage.getItem('jwt')}` 
+    };
   }
 
   _makeRequest(path, method = "GET", data = null) {
@@ -59,8 +62,7 @@ class Api {
 const apiInstance = new Api({
   baseUrl: "https://around.nomoreparties.co/v1/web_ptbr_08",
   headers: {
-    authorization: "7887b144-3999-4d14-a3d6-51691cca960c",
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 

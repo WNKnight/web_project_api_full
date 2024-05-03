@@ -1,6 +1,6 @@
-import React, {useState , useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Switch, Route } from "react-router-dom";
-import * as auth from "../utils/auth.js"
+import * as auth from "../utils/auth.js";
 import apiInstance from "../utils/api.js";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 import Header from "./Header.js";
@@ -16,23 +16,26 @@ import Footer from "./Footer.js";
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
-  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] =
-    useState(false);
-  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] =
-    useState(false);
+  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(
+    false
+  );
   const [selectedCard, setSelectedCard] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [cards, setCards] = useState([]);
   const [loggedIn, setLoggedIn] = useState(
     localStorage.getItem("loggedIn") ? true : false
-  );  const [userEmail, setUserEmail] = useState(
+  );
+  const [userEmail, setUserEmail] = useState(
     localStorage.getItem("userEmail") || ""
   );
+  const [token, setToken] = useState(localStorage.getItem("jwt") || '');
 
   useEffect(() => {
     const token = localStorage.getItem("jwt");
-
+  
     if (token) {
+      setToken(token);
       auth
         .checkToken(token)
         .then(() => {
@@ -46,9 +49,9 @@ function App() {
     } else {
       setLoggedIn(false);
     }
-
+  
     apiInstance
-      .getUserInfo()
+      .getUserInfo(token)
       .then((userInfo) => {
         setCurrentUser(userInfo);
       })
@@ -58,16 +61,17 @@ function App() {
           error
         );
       });
-
+  
     apiInstance
-      .getCards()
+      .getCards(token)
       .then((data) => {
         setCards(data);
       })
       .catch((error) => {
         console.log("Erro ao obter os dados dos cartões:", error);
       });
-  }, []);
+  }, [token]);
+  
 
   const handleLogin = (email) => {
     setLoggedIn(true);
@@ -83,7 +87,6 @@ function App() {
     localStorage.removeItem("userEmail");
     localStorage.removeItem("jwt");
   };
-  
 
   const handleUpdateUser = (userData) => {
     apiInstance
