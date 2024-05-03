@@ -20,20 +20,6 @@ module.exports.getUserById = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
-
-  bcrypt.hash(password, 10, (err, hashedPassword) => {
-    if (err) {
-      console.error('Erro ao gerar hash da senha:', err);
-      return next(err);
-    }
-    User.create({ name, about, avatar, email, password: hashedPassword })
-      .then(newUser => res.status(201).json({ data: newUser }))
-      .catch(next);
-  });
-};
-
 module.exports.updateUserProfile = (req, res, next) => {
   const userIdFromRequest = req.user._id;
   const userIdFromParams = req.params.userId;
@@ -72,6 +58,20 @@ module.exports.updateUserAvatar = (req, res, next) => {
     })
     .then(updatedUser => res.status(200).json({ data: updatedUser }))
     .catch(next);
+};
+
+module.exports.createUser = (req, res, next) => {
+  const { name, about, avatar, email, password } = req.body;
+
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error('Erro ao gerar hash da senha:', err);
+      return next(err);
+    }
+    User.create({ name, about, avatar, email, password: hashedPassword })
+      .then(newUser => res.status(201).json({ data: newUser }))
+      .catch(next);
+  });
 };
 
 module.exports.login = (req, res, next) => {
