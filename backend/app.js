@@ -4,7 +4,7 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middleware/auth');
 const errorHandle = require('./middleware/errorHandle');
 const { errors } = require('celebrate');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { requestLogger, errorLogger } = require('./middleware/logger');
 
 const app = express();
 const usersRouter = require('./routes/users');
