@@ -1,6 +1,9 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getAllUsers = (req, res, next) => {
   User.find({})
@@ -86,7 +89,7 @@ module.exports.login = (req, res, next) => {
         if (err || !result) {
           return res.status(401).json({ message: 'Credenciais inválidas' });
         }
-        const token = jwt.sign({ _id: user._id }, 'chave-para-teste', { expiresIn: '7d' }); // NÃO ESQUECER DE MUDAR A CHAVE AQUI PARA A MESMA DE AUTH.JS
+        const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'YOUMISSED', { expiresIn: '7d' });
         res.status(200).json({ token });
       });
     })

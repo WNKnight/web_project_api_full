@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 const handleAuthError = (res) => {
   res
@@ -21,7 +23,7 @@ module.exports = (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(token, 'chave-para-teste');
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'YOUMISSED');
   } catch (err) {
     return handleAuthError(res);
   }
