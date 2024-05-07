@@ -1,4 +1,4 @@
-const BASE_URL = 'https://register.nomoreparties.co';
+const BASE_URL = 'https://api.monteirodev.twilightparadox.com';
 
 export const register = async (email, password) => {
   try {
