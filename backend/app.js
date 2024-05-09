@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { login, createUser } = require('./controllers/users');
+const { celebrate, Joi } = require('celebrate');
+const { validateURL } = require('../middleware/validator');
 const auth = require('./middleware/auth');
 const errorHandle = require('./middleware/errorHandle');
 const { errors } = require('celebrate');
@@ -27,8 +29,22 @@ app.get('/crash-test', () => {
   }, 0);
 });
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
+    avatar: Joi.string().required().custom(validateURL),
+    email: Joi.string().email().required(),
+    password: Joi.string().required().min(6),
+  })
+}), createUser);
+
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().required().min(6),
+  })
+}), login);
 
 app.use(auth);
 
