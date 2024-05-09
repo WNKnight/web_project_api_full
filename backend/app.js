@@ -7,10 +7,14 @@ const auth = require('./middleware/auth');
 const errorHandle = require('./middleware/errorHandle');
 const { errors } = require('celebrate');
 const { requestLogger, errorLogger } = require('./middleware/logger');
+var cors = require('cors');
 
 const app = express();
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+
+app.use(cors());
+app.options('*', cors());
 
 app.use(express.json());
 
