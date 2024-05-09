@@ -7,13 +7,10 @@ const auth = require('./middleware/auth');
 const errorHandle = require('./middleware/errorHandle');
 const { errors } = require('celebrate');
 const { requestLogger, errorLogger } = require('./middleware/logger');
-const corsMiddleware = require('./middleware/corsMIddleware')
 
 const app = express();
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
-
-app.use(corsMiddleware());
 
 app.use(express.json());
 
