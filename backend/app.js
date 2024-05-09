@@ -13,10 +13,10 @@ const app = express();
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
+app.use(express.json());
+
 app.use(cors());
 app.options('*', cors());
-
-app.use(express.json());
 
 mongoose.connect('mongodb://localhost:27017/aroundb')
   .then(() => console.log('Conexão com MongoDB estabelecida com sucesso'))
