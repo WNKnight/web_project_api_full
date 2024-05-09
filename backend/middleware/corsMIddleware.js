@@ -1,4 +1,6 @@
-const allowedCors = [
+const cors = require('cors');
+
+const allowedOrigins = [
   'http://www.monteirodev.twilightparadox.com',
   'https://www.monteirodev.twilightparadox.com',
   'http://monteirodev.twilightparadox.com',
@@ -6,20 +8,18 @@ const allowedCors = [
   'http://localhost:3000',
 ];
 
-const corsMiddleware = (req, res, next) => {
-  const { origin } = req.headers;
-
-  if (allowedCors.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  }
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).send();
-  }
-
-  next();
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
 };
+
+const corsMiddleware = cors(corsOptions);
 
 module.exports = corsMiddleware;
