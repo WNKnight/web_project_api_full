@@ -21,6 +21,12 @@ mongoose.connect('mongodb://localhost:27017/aroundb')
 
 app.use(requestLogger);
 
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('O servidor travará agora');
+  }, 0);
+});
+
 app.post('/signin', login);
 app.post('/signup', createUser);
 
