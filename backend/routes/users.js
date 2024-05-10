@@ -7,13 +7,7 @@ const { validateURL } = require('../middleware/validator');
 
 router.get('/', authorize, userController.getAllUsers);
 
-router.get('/users/me', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    about: Joi.string().required().min(2).max(30),
-    avatar: Joi.string().required().custom(validateURL)
-  })
-}), authorize, userController.getUserProfile);
+router.get('/me', authorize, userController.getUserProfile);
 
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
