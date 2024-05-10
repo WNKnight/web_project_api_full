@@ -32,9 +32,6 @@ app.get('/crash-test', () => {
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    about: Joi.string().required().min(2).max(30),
-    avatar: Joi.string().required().custom(validateURL),
     email: Joi.string().email().required(),
     password: Joi.string().required().min(6),
   })

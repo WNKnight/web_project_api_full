@@ -60,7 +60,7 @@ class Api {
 }
 
 const apiInstance = new Api({
-  baseUrl: "api.monteirodev.twilightparadox.com",
+  baseUrl: "https://api.monteirodev.twilightparadox.com",
   headers: {
     'Content-Type': 'application/json',
   },
