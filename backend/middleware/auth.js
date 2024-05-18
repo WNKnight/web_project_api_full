@@ -23,7 +23,7 @@ module.exports = (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'YOUMISSED');
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'DevKey');
   } catch (err) {
     return handleAuthError(res);
   }
