@@ -1,5 +1,8 @@
 const Card = require('../models/card');
 
+const userId = req.user._id;
+const cardId = req.params.cardId;
+
 module.exports.getAllCards = (req, res, next) => {
   Card.find({})
     .then(cards => res.status(200).json({ data: cards }))
@@ -7,24 +10,22 @@ module.exports.getAllCards = (req, res, next) => {
 };
 
 module.exports.createCard = (req, res, next) => {
-  const { name, link, owner } = req.body;
-  const ownerId = req.user._id;
+  const { name, link } = req.body;
 
-  Card.create({ name, link, owner: ownerId })
-    .then(newCard => res.status(201).json({ data: newCard }))
-    .catch(error => {
-      if (error.name === 'ValidationError') {
-        res.status(ERROR_INVALID_DATA).json({ message: 'Dados inválidos passados para criar um cartão' });
-      } else {
-        next(error);
+  Card.create({ name, link, owner: userId })
+    .then((newCard) => {
+      if (!newCard) {
+        const error = new Error('Falha ao criar um novo cartão');
+        error.statusCode = 400;
+        throw error;
       }
-    });
+      res.status(201).json({ data: newCard });
+    })
+    .catch(next);
 };
 
-module.exports.deleteCard = (req, res, next) => {
-  const cardId = req.params.cardId;
-  const userIdFromRequest = req.user._id;
 
+module.exports.deleteCard = (req, res, next) => {
   Card.findById(cardId)
     .then(card => {
       if (!card) {
@@ -32,21 +33,20 @@ module.exports.deleteCard = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
-      if (card.owner !== userIdFromRequest) {
-        const error = new Error('Acesso proibido: Você não pode excluir cartões de outros usuários');
-        error.statusCode = 403;
+      if (card.owner !== userId) {
+        const error = new Error('Você não tem permissão para excluir este cartão');
+        error.statusCode = 401;
         throw error;
       }
       return Card.findByIdAndDelete(cardId);
     })
-    .then(() => res.status(200).json({ message: 'Cartão deletado com sucesso' }))
+    .then(deletedCard => {
+      res.status(200).json({ message: 'Cartão deletado com sucesso', data: deletedCard });
+    })
     .catch(next);
 };
 
 module.exports.likeCard = (req, res, next) => {
-  const userId = req.user._id;
-  const cardId = req.params.cardId;
-
   Card.findByIdAndUpdate(
     cardId,
     { $addToSet: { likes: userId } },
@@ -62,9 +62,6 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  const userId = req.user._id;
-  const cardId = req.params.cardId;
-
   Card.findByIdAndUpdate(
     cardId,
     { $pull: { likes: userId } },
