@@ -18,7 +18,7 @@ export const register = async (email, password) => {
     const data = await response.json();
     return data.data;
   } catch (error) {
-    console.error('Registration error:', error);
+    console.log('Erro ao se registrar:', error);
     throw error;
   }
 };
@@ -41,7 +41,7 @@ export const authorize = async (email, password) => {
     const { token } = await response.json();
     localStorage.setItem('jwt', token);
   } catch (error) {
-    console.error('Authorization error:', error);
+    console.log('Erro de authorizacão:', error);
     throw error;
   }
 };
@@ -64,7 +64,7 @@ export const checkToken = async (token) => {
     const data = await response.json();
     return data.data;
   } catch (error) {
-    console.error('Token verification error:', error);
+    console.log('Erro na verificacão do token:', error);
     throw error;
   }
 };
