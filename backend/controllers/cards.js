@@ -34,7 +34,7 @@ module.exports.deleteCard = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
-      if (card.owner !== userId) {
+      if (card.owner.toString() !== userId) {
         const error = new Error('Você não tem permissão para excluir este cartão');
         error.statusCode = 401;
         throw error;
