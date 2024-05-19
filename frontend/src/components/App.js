@@ -76,6 +76,7 @@ function App() {
     localStorage.removeItem("loggedIn");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("jwt");
+    window.location.reload();
   };
 
   const handleUpdateUser = (userData) => {
