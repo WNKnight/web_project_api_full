@@ -3,6 +3,7 @@ import { Switch, Route } from "react-router-dom";
 import * as auth from "../utils/auth.js";
 import apiInstance from "../utils/api.js";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
+import PopupWithForm from './PopupWithForm.js';
 import Header from "./Header.js";
 import Login from "./Login.js";
 import Register from "./Register.js";
@@ -11,24 +12,20 @@ import Main from "./Main.js";
 import EditAvatarPopup from "./EditAvatarPopup.js";
 import AddPlacePopup from "./AddPlacePopup.js";
 import EditProfilePopup from "./EditProfilePopup.js";
+import ImagePopup from "./ImagePopup.js";
 import Footer from "./Footer.js";
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
-  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(
-    false
-  );
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [cardToDelete, setCardToDelete] = useState(null);
+  const [currentUser, setCurrentUser] = useState("");
   const [cards, setCards] = useState([]);
-  const [loggedIn, setLoggedIn] = useState(
-    localStorage.getItem("loggedIn") ? true : false
-  );
-  const [userEmail, setUserEmail] = useState(
-    localStorage.getItem("userEmail") || ""
-  );
+  const [loggedIn, setLoggedIn] = useState(localStorage.getItem("loggedIn") ? true : false);
+  const [userEmail, setUserEmail] = useState(localStorage.getItem("userEmail") || "");
   const [token, setToken] = useState(localStorage.getItem("jwt") || '');
 
   useEffect(() => {
@@ -36,8 +33,7 @@ function App() {
   
     if (token) {
       setToken(token);
-      auth
-        .checkToken(token)
+      auth.checkToken(token)
         .then(() => {
           setLoggedIn(true);
           setUserEmail(localStorage.getItem("userEmail"));
@@ -46,32 +42,26 @@ function App() {
           console.error("Erro ao verificar token:", error);
           setLoggedIn(false);
         });
+
+        apiInstance.getUserInfo(token)
+        .then((userInfo) => {
+          setCurrentUser(userInfo.data);
+        })
+        .catch((error) => {
+          console.log("Erro ao recuperar as informações do usuário atual:", error);
+        });
+
+        apiInstance.getCards(token)
+        .then((cards) => {
+          setCards(cards.data.reverse());
+        })
+        .catch((error) => {
+          console.log("Erro ao obter os dados dos cartões:", error);
+        });
     } else {
       setLoggedIn(false);
     }
-  
-    apiInstance
-      .getUserInfo(token)
-      .then((userInfo) => {
-        setCurrentUser(userInfo);
-      })
-      .catch((error) => {
-        console.log(
-          "Erro ao recuperar as informacoes do usuario atual:",
-          error
-        );
-      });
-  
-    apiInstance
-      .getCards(token)
-      .then((data) => {
-        setCards(data);
-      })
-      .catch((error) => {
-        console.log("Erro ao obter os dados dos cartões:", error);
-      });
   }, [token]);
-  
 
   const handleLogin = (email) => {
     setLoggedIn(true);
@@ -89,10 +79,9 @@ function App() {
   };
 
   const handleUpdateUser = (userData) => {
-    apiInstance
-      .setUserInfo(userData)
+    apiInstance.setUserInfo(userData)
       .then((updatedUser) => {
-        setCurrentUser(updatedUser);
+        setCurrentUser(updatedUser.data);
         closeAllPopups();
       })
       .catch((error) => {
@@ -101,10 +90,9 @@ function App() {
   };
 
   const handleUpdateAvatar = (avatarData) => {
-    apiInstance
-      .setUserAvatar(avatarData)
+    apiInstance.setUserAvatar(avatarData)
       .then((updatedUser) => {
-        setCurrentUser(updatedUser);
+        setCurrentUser(updatedUser.data);
         closeAllPopups();
       })
       .catch((error) => {
@@ -113,10 +101,9 @@ function App() {
   };
 
   const handleCardLike = (card) => {
-    const isLiked = card.likes.some((i) => i._id === currentUser._id);
-    apiInstance
-      .changeLikeCardStatus(card._id, !isLiked)
-      .then((newCard) => {
+    const isLiked = card.likes.includes(currentUser._id);
+    apiInstance.changeLikeCardStatus(card._id, !isLiked)
+      .then(({ data: newCard }) => {
         setCards((state) =>
           state.map((c) => (c._id === card._id ? newCard : c))
         );
@@ -126,22 +113,23 @@ function App() {
       });
   };
 
-  const handleCardDelete = (card) => {
-    apiInstance
-      .deleteCard(card._id)
-      .then(() => {
-        setCards((prevCards) => prevCards.filter((c) => c._id !== card._id));
-      })
-      .catch((error) => {
-        console.log("Erro ao excluir o cartão:", error);
-      });
+  const handleCardDelete = () => {
+    if (cardToDelete) {
+      apiInstance.deleteCard(cardToDelete._id)
+        .then(() => {
+          setCards((prevCards) => prevCards.filter((c) => c._id !== cardToDelete._id));
+          closeAllPopups();
+        })
+        .catch((error) => {
+          console.log("Erro ao excluir o cartão:", error);
+        });
+    }
   };
 
   const handleAddPlaceSubmit = (newCardData) => {
-    apiInstance
-      .addCard(newCardData)
-      .then((newCard) => {
-        setCards([newCard, ...cards]);
+    apiInstance.addCard(newCardData)
+      .then(({ data: newCard }) => {
+        setCards((prevCards) => [newCard, ...prevCards]);
         closeAllPopups();
       })
       .catch((error) => {
@@ -161,8 +149,9 @@ function App() {
     setIsEditAvatarPopupOpen(true);
   };
 
-  const handleDeleteButtonClick = () => {
+  const handleDeleteButtonClick = (card) => {
     setIsDeleteConfirmationOpen(true);
+    setCardToDelete(card);
   };
 
   const handleCardClick = (card) => {
@@ -198,6 +187,7 @@ function App() {
               isAddPlacePopupOpen={isAddPlacePopupOpen}
               isEditAvatarPopupOpen={isEditAvatarPopupOpen}
               isDeleteConfirmationOpen={isDeleteConfirmationOpen}
+              cards={cards}
               selectedCard={selectedCard}
               onEditProfileClick={handleEditProfileClick}
               onAddPlaceClick={handleAddPlaceClick}
@@ -205,10 +195,9 @@ function App() {
               onCloseClick={closeAllPopups}
               onCardClick={handleCardClick}
               onDeleteButtonClick={handleDeleteButtonClick}
+              onConfirmDelete={handleCardDelete}
               onUpdateUser={handleUpdateUser}
               onCardLike={handleCardLike}
-              onCardDelete={handleCardDelete}
-              cards={cards}
             />
           </ProtectedRoute>
         </Switch>
@@ -226,6 +215,18 @@ function App() {
           isOpen={isEditAvatarPopupOpen}
           onClose={closeAllPopups}
           onUpdateAvatar={handleUpdateAvatar}
+        />
+        <ImagePopup selectedCard={selectedCard} onClose={closeAllPopups} />
+        <PopupWithForm
+          name="DeleteConfirmation"
+          title="Tem Certeza?"
+          buttonId="confirmButton"
+          buttonTextId="confirmButtonText"
+          buttonText="Sim"
+          isOpen={isDeleteConfirmationOpen}
+          onClose={closeAllPopups}
+          onSubmit={handleCardDelete}
+          isValid={true}
         />
         <Footer />
       </CurrentUserContext.Provider>
