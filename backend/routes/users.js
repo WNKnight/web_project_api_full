@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const {getAllUsers,getCurrentUser,getUserById,updateUserProfile,updateUserAvatar} = require('../controllers/users');
+const {getAllUsers,getUserProfile,getUserById,updateUserProfile,updateUserAvatar} = require('../controllers/users');
 const {updateProfile , updateAvatar} = require('../middleware/validators')
 
 
 router.get('/', getAllUsers);
 
-router.get('/me', getCurrentUser);
+router.get('/me', getUserProfile);
 
 router.get('/:userId', getUserById);
 
