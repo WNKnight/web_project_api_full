@@ -1,8 +1,5 @@
 const Card = require('../models/card');
 
-const userId = req.user._id;
-const cardId = req.params.cardId;
-
 module.exports.getAllCards = (req, res, next) => {
   Card.find({})
     .then(cards => res.status(200).json({ data: cards }))
@@ -11,6 +8,7 @@ module.exports.getAllCards = (req, res, next) => {
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
+  const userId = req.user._id;
 
   Card.create({ name, link, owner: userId })
     .then((newCard) => {
@@ -26,6 +24,8 @@ module.exports.createCard = (req, res, next) => {
 
 
 module.exports.deleteCard = (req, res, next) => {
+  const cardId = req.params.cardId;
+
   Card.findById(cardId)
     .then(card => {
       if (!card) {
@@ -47,6 +47,8 @@ module.exports.deleteCard = (req, res, next) => {
 };
 
 module.exports.likeCard = (req, res, next) => {
+  const cardId = req.params.cardId;
+
   Card.findByIdAndUpdate(
     cardId,
     { $addToSet: { likes: userId } },
@@ -62,6 +64,8 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
+  const cardId = req.params.cardId;
+
   Card.findByIdAndUpdate(
     cardId,
     { $pull: { likes: userId } },

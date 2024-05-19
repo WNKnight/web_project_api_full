@@ -5,9 +5,6 @@ require('dotenv').config();
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-const userId = req.user._id;
-const userIdParams = req.params.userId;
-
 module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then(users => res.status(200).json({ data: users }))
@@ -15,6 +12,7 @@ module.exports.getAllUsers = (req, res, next) => {
 };
 
 module.exports.getUserById = (req, res, next) => {
+  const userIdParams = req.params.userId;
   User.findById(userIdParams)
     .orFail(() => {
       const error = new Error('Usuário não encontrado');
@@ -26,22 +24,24 @@ module.exports.getUserById = (req, res, next) => {
 };
 
 module.exports.updateUserProfile = (req, res, next) => {
- const { name, about } = req.body;
+  const { name, about } = req.body;
+  const userId = req.user._id;
 
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+  User.findByIdAndUpdate(userId, { name, about }, { new: true })
     .orFail(() => {
       const error = new Error('Usuário não encontrado');
       error.statusCode = 404;
       throw error;
     })
-    .then(updatedUser => res.status(200).json({data: updatedUser} ))
+    .then(updatedUser => res.status(200).json({ data: updatedUser }))
     .catch(next);
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
+  const userId = req.user._id;
 
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
+  User.findByIdAndUpdate(userId, { avatar }, { new: true })
     .orFail(() => {
       const error = new Error('Usuário não encontrado');
       error.statusCode = 404;
@@ -57,7 +57,7 @@ module.exports.createUser = (req, res, next) => {
   User.findOne({ email })
     .then(existingUser => {
       if (existingUser) {
-        return res.status(400).json({ message: 'Esse email já esta em uso' });
+        return res.status(400).json({ message: 'Esse email já está em uso' });
       } else {
         bcrypt.hash(password, 10, (err, hashedPassword) => {
           if (err) {
@@ -94,7 +94,8 @@ module.exports.login = (req, res, next) => {
 };
 
 module.exports.getUserProfile = (req, res, next) => {
-   User.findById(userId)
+  const userId = req.user._id;
+  User.findById(userId)
     .then(user => {
       if (!user) {
         return res.status(404).json({ message: 'Usuário não encontrado' });
