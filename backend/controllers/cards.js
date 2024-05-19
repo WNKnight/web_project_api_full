@@ -25,6 +25,7 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   const cardId = req.params.cardId;
+  const userId = req.user._id;
 
   Card.findById(cardId)
     .then(card => {
@@ -48,6 +49,7 @@ module.exports.deleteCard = (req, res, next) => {
 
 module.exports.likeCard = (req, res, next) => {
   const cardId = req.params.cardId;
+  const userId = req.user._id;
 
   Card.findByIdAndUpdate(
     cardId,
@@ -65,6 +67,7 @@ module.exports.likeCard = (req, res, next) => {
 
 module.exports.dislikeCard = (req, res, next) => {
   const cardId = req.params.cardId;
+  const userId = req.user._id;
 
   Card.findByIdAndUpdate(
     cardId,
