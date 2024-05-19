@@ -30,6 +30,7 @@ const Login = ({ handleLogin }) => {
         setIsSuccess(false);
         setShowToolTip(false);
         history.push("/");
+        window.location.reload();
       }, 2000);
     } catch (error) {
       console.error("Erro ao fazer login:", error);
@@ -70,9 +71,9 @@ const Login = ({ handleLogin }) => {
           maxLength={20}
           required
         />
-      <button type="submit" className="auth__button auth__login-button">
+        <button type="submit" className="auth__button auth__login-button">
           Entrar
-      </button>
+        </button>
       </form>
       <Link to="/signup" className="auth__link auth__login-signup">
         Ainda não é membro? Inscreva-se aqui!
